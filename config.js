@@ -18,7 +18,7 @@ var config = {
     title: 'El mundo, pieza a pieza',
     subtitle: 'La arquitectura como lenguaje universal que LEGO traduce a escala humana',
     byline: 'Ana Hernández Díaz',
-    footer: 'Fuentes: web de Lego y Wikipedia <br> Created using <a href="https://github.com/mapbox/storytelling" target="_blank">Mapbox Storytelling</a> template.',
+    footer: 'Fuentes: web de LEGO y Wikipedia <br> Created using <a href="https://github.com/mapbox/storytelling" target="_blank">Mapbox Storytelling</a> template.',
     chapters: [
         {
             id: 'slug-style-id',
