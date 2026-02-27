@@ -142,6 +142,7 @@
             border: 2px solid #000000;
             box-shadow: 0 0 4px rgba(0,0,0,0.3);
             cursor: pointer;
+            touch-action: manipulation;
         }
 
         @media (max-width: 750px) {
@@ -374,7 +375,7 @@
                             });
                             // click/tap handlers for mobile (and click-supporting devices)
                             el.addEventListener('click', function (e) {
-                                e.stopPropagation();
+                                e.preventDefault(); e.stopPropagation();
                                 if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; return; }
                                 if (chap.popup) {
                                     chapterPopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: true })
@@ -384,7 +385,7 @@
                                 }
                             });
                             el.addEventListener('touchstart', function (e) {
-                                e.stopPropagation();
+                                e.preventDefault(); e.stopPropagation();
                                 if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; return; }
                                 if (chap.popup) {
                                     chapterPopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: true })
@@ -393,6 +394,19 @@
                                         .addTo(map);
                                 }
                             });
+                            // pointer events for broader device support
+                            el.addEventListener('pointerdown', function (e) {
+                                e.preventDefault(); e.stopPropagation();
+                                if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; return; }
+                                if (chap.popup) {
+                                    chapterPopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: true })
+                                        .setLngLat(chap.location.center)
+                                        .setHTML(chap.popup)
+                                        .addTo(map);
+                                }
+                            });
+                            el.addEventListener('pointerenter', function (e) { e.stopPropagation(); /* handled above */ });
+                            el.addEventListener('pointerleave', function (e) { e.stopPropagation(); /* handled above */ });
                             chapterMarkers.push(marker);
                         });
                         // hide all markers initially; only the active chapter's marker will be shown on step enter
