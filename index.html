@@ -9,6 +9,7 @@
         href="https://raw.githubusercontent.com/mapbox/assembly/publisher-staging/src/svgs/mapbox.svg">
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css' rel='stylesheet' />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/mapbox-gl-globe-minimap@1.2.0/dist/bundle.js"></script>
     <script src="https://unpkg.com/scrollama"></script>
     <style>
@@ -354,7 +355,10 @@
                 el.style.display = 'none';
                 var m = new mapboxgl.Marker(el).setLngLat(chap.location.center).addTo(map);
                 m._showMarker = (typeof chap.showMarker === 'boolean') ? chap.showMarker : true;
-                // attach hover and touch handlers to show popup
+                // improve touch behavior: allow pointer events and touch-action
+                el.style.touchAction = 'manipulation';
+                el.style.webkitTapHighlightColor = 'transparent';
+                // attach hover, pointer and touch handlers to show popup
                 (function(chap, m){
                     var el = m.getElement();
                     if (!el) return;
@@ -369,6 +373,12 @@
                         if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }
                     });
                     el.addEventListener('click', function(e){
+                        e.stopPropagation();
+                        if (!chap.popup) return;
+                        if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }
+                        else { chapterPopup = new mapboxgl.Popup({offset:25}).setLngLat(chap.location.center).setHTML(chap.popup).addTo(map); }
+                    });
+                    el.addEventListener('pointerdown', function(e){
                         e.stopPropagation();
                         if (!chap.popup) return;
                         if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }
