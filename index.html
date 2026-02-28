@@ -9,7 +9,6 @@
         href="https://raw.githubusercontent.com/mapbox/assembly/publisher-staging/src/svgs/mapbox.svg">
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css' rel='stylesheet' />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/mapbox-gl-globe-minimap@1.2.0/dist/bundle.js"></script>
     <script src="https://unpkg.com/scrollama"></script>
     <style>
@@ -142,7 +141,6 @@
             border: 2px solid #000000;
             box-shadow: 0 0 4px rgba(0,0,0,0.3);
             cursor: pointer;
-            touch-action: manipulation;
         }
 
         @media (max-width: 750px) {
@@ -154,7 +152,6 @@
                 width: 90vw;
                 margin: 0 auto;
             }
-            .map-chapter-marker { width: 28px; height: 28px; }
         }
 
         /* Fix issue on mobile browser where scroll breaks  */
@@ -241,10 +238,6 @@
         config.chapters.forEach((record, idx) => {
             var container = document.createElement('div');
             var chapter = document.createElement('div');
-            // icon element for hover-triggered popup
-            var iconEl = document.createElement('div');
-            iconEl.className = 'chapter-icon';
-            iconEl.innerText = idx + 1;
 
             if (record.title) {
                 var title = document.createElement('h3');
@@ -271,8 +264,6 @@
             }
 
             chapter.classList.add(config.theme);
-            // append icon and content
-            container.appendChild(iconEl);
             container.appendChild(chapter);
             container.classList.add(alignments[record.alignment] || 'centered');
             if (record.hidden) {
@@ -350,84 +341,49 @@
                 });
             };
 
-                        // create per-chapter markers that will show popups on hover
-                        var chapterMarkers = [];
-                        config.chapters.forEach(function (chap, idx) {
-                            if (!chap || !chap.location) return;
-                            var el = document.createElement('div');
-                            el.className = 'map-chapter-marker';
-                            el.dataset.chapterIndex = idx;
-                            var marker = new mapboxgl.Marker(el).setLngLat(chap.location.center).addTo(map);
-                            // hover handlers on marker element (desktop)
-                            el.addEventListener('mouseenter', function (e) {
-                                e.stopPropagation();
-                                if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }
-                                if (chap.popup) {
-                                    chapterPopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: true })
-                                        .setLngLat(chap.location.center)
-                                        .setHTML(chap.popup)
-                                        .addTo(map);
-                                }
-                            });
-                            el.addEventListener('mouseleave', function (e) {
-                                e.stopPropagation();
-                                if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }
-                            });
-                            // click/tap handlers for mobile (and click-supporting devices)
-                            el.addEventListener('click', function (e) {
-                                e.preventDefault(); e.stopPropagation();
-                                if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; return; }
-                                if (chap.popup) {
-                                    chapterPopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: true })
-                                        .setLngLat(chap.location.center)
-                                        .setHTML(chap.popup)
-                                        .addTo(map);
-                                }
-                            });
-                            el.addEventListener('touchstart', function (e) {
-                                e.preventDefault(); e.stopPropagation();
-                                if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; return; }
-                                if (chap.popup) {
-                                    chapterPopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: true })
-                                        .setLngLat(chap.location.center)
-                                        .setHTML(chap.popup)
-                                        .addTo(map);
-                                }
-                            });
-                            // pointer events for broader device support
-                            el.addEventListener('pointerdown', function (e) {
-                                e.preventDefault(); e.stopPropagation();
-                                if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; return; }
-                                if (chap.popup) {
-                                    chapterPopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: true })
-                                        .setLngLat(chap.location.center)
-                                        .setHTML(chap.popup)
-                                        .addTo(map);
-                                }
-                            });
-                            el.addEventListener('pointerenter', function (e) { e.stopPropagation(); /* handled above */ });
-                            el.addEventListener('pointerleave', function (e) { e.stopPropagation(); /* handled above */ });
-                            chapterMarkers.push(marker);
-                        });
-                        // hide all markers initially; only the active chapter's marker will be shown on step enter
-                        chapterMarkers.forEach(function(m){
-                            var el = m.getElement && m.getElement();
-                            if (el) el.style.display = 'none';
-                        });
-
-                        // hide popup when tapping/clicking outside markers (mobile and desktop)
-                        document.addEventListener('click', function (e) {
-                            if (!e.target.closest || !e.target.closest('.map-chapter-marker')) {
-                                if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }
-                            }
-                        });
-                        document.addEventListener('touchstart', function (e) {
-                            if (!e.target.closest || !e.target.closest('.map-chapter-marker')) {
-                                if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }
-                            }
-                        });
-
+            // create per-chapter markers (hidden by default)
+            var chapterMarkers = [];
             var chapterPopup = null;
+            // dismiss popup when clicking/touching outside
+            document.addEventListener('click', function(){ if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }});
+            document.addEventListener('touchstart', function(){ if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }});
+            var fifteenthIndex = config.chapters.findIndex(function(c){ return c.id === 'fifteenth-chapter'; });
+            config.chapters.forEach(function(chap, i){
+                var el = document.createElement('div');
+                el.className = 'map-chapter-marker';
+                el.style.display = 'none';
+                var m = new mapboxgl.Marker(el).setLngLat(chap.location.center).addTo(map);
+                m._showMarker = (typeof chap.showMarker === 'boolean') ? chap.showMarker : true;
+                // attach hover and touch handlers to show popup
+                (function(chap, m){
+                    var el = m.getElement();
+                    if (!el) return;
+                    el.addEventListener('mouseenter', function(e){
+                        e.stopPropagation();
+                        if (!chap.popup) return;
+                        if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }
+                        chapterPopup = new mapboxgl.Popup({offset: 25, closeOnClick: false}).setLngLat(chap.location.center).setHTML(chap.popup).addTo(map);
+                    });
+                    el.addEventListener('mouseleave', function(e){
+                        e.stopPropagation();
+                        if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }
+                    });
+                    el.addEventListener('click', function(e){
+                        e.stopPropagation();
+                        if (!chap.popup) return;
+                        if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }
+                        else { chapterPopup = new mapboxgl.Popup({offset:25}).setLngLat(chap.location.center).setHTML(chap.popup).addTo(map); }
+                    });
+                    el.addEventListener('touchstart', function(e){
+                        e.stopPropagation();
+                        if (!chap.popup) return;
+                        if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }
+                        else { chapterPopup = new mapboxgl.Popup({offset:25}).setLngLat(chap.location.center).setHTML(chap.popup).addTo(map); }
+                    }, {passive: true});
+                })(chap, m);
+                chapterMarkers.push(m);
+            });
+
             // setup the instance, pass callback functions
             scroller
                 .setup({
@@ -439,12 +395,14 @@
                     var current_chapter = config.chapters.findIndex(chap => chap.id === response.element.id);
                     var chapter = config.chapters[current_chapter];
 
-                    // show only the active chapter's marker; never show marker for chapter index 0
+                    // show only the active chapter's marker; never show marker for chapter index 0 or fifteenth
                     if (typeof chapterMarkers !== 'undefined') {
                         chapterMarkers.forEach(function(m, i){
                             var el = m.getElement && m.getElement();
                             if (!el) return;
-                            el.style.display = (i === current_chapter && i !== 0) ? '' : 'none';
+                            var hideAlways = (i === 0) || (i === fifteenthIndex);
+                            var show = (i === current_chapter) && !hideAlways && (typeof m._showMarker === 'undefined' || m._showMarker);
+                            el.style.display = show ? '' : 'none';
                         });
                     }
 
@@ -460,7 +418,21 @@
                     if (chapter.callback) {
                         window[chapter.callback]();
                     }
-                    if (chapter.rotateAnimation) {
+                    if (chapter.translateAnimation) {
+                        map.once('moveend', () => {
+                            const center = map.getCenter();
+                            var offsetLng = 10, offsetLat = 0;
+                            if (Array.isArray(chapter.translateAnimation)) {
+                                offsetLng = chapter.translateAnimation[0] || 0;
+                                offsetLat = chapter.translateAnimation[1] || 0;
+                            } else if (typeof chapter.translateAnimation === 'number') {
+                                offsetLng = chapter.translateAnimation;
+                            }
+                            const reverse = chapter.translateDirection === 'reverse' || chapter.translateDirection === 'ccw' || chapter.translateDirection === 'left' || chapter.translateDirection === 'counterclockwise' || chapter.translateAnimation === 'reverse';
+                            if (reverse) offsetLng = -Math.abs(offsetLng);
+                            map.easeTo({center: [center.lng + offsetLng, center.lat + offsetLat], duration: 30000, easing: function (t) { return t; }});
+                        });
+                    } else if (chapter.rotateAnimation) {
                         map.once('moveend', () => {
                             const rotateNumber = map.getBearing();
                             let offset = 180;
@@ -476,7 +448,6 @@
                             });
                         });
                     }
-                    // popups are shown on marker hover (handled by marker event listeners)
                     if (config.auto) {
                         var next_chapter = (current_chapter + 1) % config.chapters.length;
                         map.once('moveend', () => {
@@ -490,11 +461,8 @@
                     if (chapter.onChapterExit.length > 0) {
                         chapter.onChapterExit.forEach(setLayerOpacity);
                     }
-                    if (chapterPopup) {
-                        chapterPopup.remove();
-                        chapterPopup = null;
-                    }
-                })
+                    if (chapterPopup) { chapterPopup.remove(); chapterPopup = null; }
+                });
 
 
             if (config.auto) {

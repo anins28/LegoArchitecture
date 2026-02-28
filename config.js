@@ -34,8 +34,10 @@ var config = {
                 bearing: 0   
             }, 
             mapAnimation: 'flyTo',
-            rotateAnimation: true,
-            rotateDirection: 'reverse',
+            speed: 4,
+            curve: 5,
+            rotateAnimation: false ,
+            translateAnimation: 40,
             callback: '',
             onChapterEnter: [
                 
@@ -326,6 +328,30 @@ var config = {
             onChapterEnter: [],
             onChapterExit: []
         }, 
+         {       
+        id: 'fifteenth-chapter',
+            alignment: 'center',
+            hidden: false,
+            title: 'La escala del detalle de los sets LEGO Architecture',
+            image: './assets/SetsLegoPiezas.png',
+            description: 'Cada monumento encierra siglos de historia, pero también miles de piezas cuando se traduce al lenguaje LEGO. El número de elementos necesarios para reconstruir cada obra revela no solo su complejidad arquitectónica, sino también el nivel de detalle que define su identidad.',
+            showMarker: false,
+            location: {
+                center: [-38.54128, 35.74274],
+                zoom: 2.45,
+                pitch: -17.60,
+                bearing: 0   
+            },
+            mapAnimation: 'flyTo',
+            speed: 4,
+            curve: 5,
+            rotateAnimation: false,
+            translateAnimation: 40,
+            callback: '',
+            onChapterEnter: [],
+            onChapterExit: []
+        }, 
+
 
 
     ]
